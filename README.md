@@ -28,7 +28,8 @@ CREATE TABLE people  (
 			<artifactId>spring-batch-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-5.创建pojo-person
+5.开始编写代码
+5.1创建pojo-person
 -Lombok常用注解：
 @Data 注解在类上；提供类所有属性的 getting 和 setting 方法，此外还提供了equals、canEqual、hashCode、toString 方法
 @Setter ：注解在属性上；为属性提供 setting 方法
@@ -42,3 +43,8 @@ CREATE TABLE people  (
 @SneakyThrows : 等同于try/catch 捕获异常
 @NonNull : 如果给参数加个这个注解 参数为null会抛出空指针异常
 @Value : 注解和@Data类似，区别在于它会把所有成员变量默认定义为private final修饰，并且不会生成set方法。
+
+6.slf4j Logger 的使用
+
+
+

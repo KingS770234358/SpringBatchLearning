@@ -3,6 +3,7 @@ package com.wq.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+// lombok包
 @Data
 @AllArgsConstructor
 public class Person {
