@@ -1,3 +1,12 @@
+### Batch processing with Spring
+Job Launcher -> Job -> Step ->Item Reader
+    |            |       |  ->Item Processor
+    |            |       |  ->Item Writer
+     ---Job Repository--- 
+
+要实现的服务：从CSV的SpreadSheet中导入数据，使用自定义的代码进行转换，
+最后把数据存入数据库（hsqldb 内存数据库）
+
 1.创建CSV文件，待处理的数据
 在csv text中
     Jill,Doe
