@@ -1,4 +1,10 @@
 1.创建CSV文件，待处理的数据
+在csv text中
+    Jill,Doe
+    Joe,Doe
+    Justin,Doe
+    Jane,Doe
+    John,Doe
 2.接数据库
 jdbc:mysql://localhost:3306/student?serverTimezone=CTT&amp;useUnicode=true&amp;characterEncoding=utf-8&amp;allowMultiQueries=true
 3.创建表

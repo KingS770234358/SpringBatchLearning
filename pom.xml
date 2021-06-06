@@ -42,7 +42,9 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- 连接MySQL数据库 -->
+        <!-- 连接MySQL数据库
+             嵌入式DataSource数据源（存在内存中）
+        -->
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>

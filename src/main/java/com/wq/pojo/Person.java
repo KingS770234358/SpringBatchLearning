@@ -2,9 +2,11 @@ package com.wq.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 // lombok包
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class Person {
     private String lastName;
