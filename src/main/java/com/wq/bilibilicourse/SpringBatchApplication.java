@@ -1,12 +1,17 @@
 package com.wq.bilibilicourse;
-
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
 
 @SpringBootApplication(scanBasePackages = {"com.wq.bilibilicourse"})
 public class SpringBatchApplication {
     public static void main(String[] args) {
+        for (String arg : args) {
+            System.out.println(arg);
+        }
         /**
          * 问题1:在JobConfiguration中@Bean定义了两个同名的Step1，后者覆盖前者
          * 问题2:在pom.xml中添加mysql-connector-java和spring-boot-starter-jdbc依赖，
@@ -18,6 +23,9 @@ public class SpringBatchApplication {
          *       所以Job和step的方法名都不能有重复的
          * 问题6：测试RepeatStatus.CONTINUABLE的时候直接关闭程序，
          *       改回RepeatStatus.FINISHED无法执行，需要数据库中原有的记录
+         * 问题7：可以在application.Properties中使用
+         *      spring.batch.job.names=parentJob指定要运行的Job
+         * 问题8：JobsParameters 从运行时参数中取参数失败 ×
          */
         SpringApplication.run(SpringBatchApplication.class);
     }

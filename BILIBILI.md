@@ -59,3 +59,12 @@ Job Launcher -> Job -> Step ->Item Reader
  * 问题6：测试RepeatStatus.CONTINUABLE的时候直接关闭程序，
  *       改回RepeatStatus.FINISHED无法执行，需要数据库中原有的记录
  */
+ 
+ ### 第六节 接听器的使用
+ 实现接口 & 使用注解
+ JobExecutionListener(before, after)             Job的监听
+ StepExecutionListener(before, after)            Step的监听
+ ChunkListener(before, after, error)             如果Step使用Chunk实现
+ ItemReadListener,ItemProcessListener,ItemWriteListener(before, after, error)
+ 
+ 
