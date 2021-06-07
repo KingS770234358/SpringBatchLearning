@@ -1,3 +1,4 @@
+--* classpath（resources）下，名为scheme-all.sql的SQL脚本会默认被HSQL运行 *--
 DROP TABLE people IF EXISTS ;
 CREATE TABLE people(
     person_id BIGINT IDENTITY NOT NULL PRIMARY KEY,
