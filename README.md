@@ -61,5 +61,14 @@ CREATE TABLE people  (
 
 6.slf4j Logger 的使用
 
+7.数据源和数据库的区别
+7.1数据源，如odbc数据源，是连接到实际数据库的一条路径，仅仅是数据库的连接名称，记录连接到哪个数据库以及如何连接，
+其中并无真正的数据，一个数据库可以有多个数据源连接。
+7.2SpringBoot中的数据源Hikari
+Spring Boot 默认已经配置好了数据源Hikari DataSource，程序员可以直接 DI 注入然后使用即可
+7.3HSQL
+HSQL可以使用内存模式，将数据存储在内存中，SpringBoot通过Hikari连接HSQL进行数据传输
+
+
 
 
