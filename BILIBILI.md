@@ -31,3 +31,18 @@ SpringBoot项目整合SpringBatch，由于SpringBatch是基于Job实现的，Job
 过程中的相关信息需要持久化到数据库中，所以会提示要配置“数据源”（H2/HSQL）
 
 ### 第三章 使用MySQL数据库进行持久化
+当数据库中已经有某个Job的数据时，不能重新启动。
+Step already complete or not restartable,
+
+### 第五集 SpringBatch核心API
+Job Launcher -> Job -> Step ->Item Reader
+    |            |       |  ->Item Processor
+    |            |       |  ->Item Writer
+     ---Job Repository--- 
+ 还有：
+ JobParameter：给Job传参数，返回不同的JobInstance
+ JobInstance：Job每一次执行都对应一个Instance。
+ JobExecution
+ JobExecutionContext
+ StepExecution
+ StepExecutionContext

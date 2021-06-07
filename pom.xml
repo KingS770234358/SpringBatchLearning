@@ -42,6 +42,20 @@
             <scope>test</scope>
         </dependency>
         <!-- 使用mysql数据库进行持久化 -->
+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.25</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-jdbc -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+
         <!-- 嵌入式DataSource数据源（存在内存中）-->
 <!--        <dependency>-->
 <!--            <groupId>org.hsqldb</groupId>-->

@@ -42,7 +42,8 @@ public class JobConfiguration {
     @Bean
     public Job createUserJob() {
         // 使用jobBuilderFactory创建人物
-        return jobBuilderFactory.get("importUserJob") // get()方法定义批任务名
+        System.out.println("------jobName------");
+        return jobBuilderFactory.get("jobName") // get()方法定义批任务名
                 .start(this.step1()) // step()方法可以传入Step对象 或者 Flow对象。
                 .build(); // 正式的开始创建Job对象（上面都是对Job一些列的配置
     }
@@ -55,14 +56,14 @@ public class JobConfiguration {
                 .tasklet(new Tasklet() { // Tasklet是一个接口，要实现execute()方法
                     @Override
                     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-                        System.out.println("hello world");
+                        System.out.println("-------step1 executing-------");
                         // Step(tastlet)执行完之后 要返回1个状态RepeatStatus，用来决定后续要如何执行
-                        // RepeatStatus：FINISHED / CONTINUABLE
+                        // RepeatStatus：FINISHED 执行下1个Step / CONTINUABLE再次执行当前Step
                         return RepeatStatus.FINISHED;
                     }
                 }).build();
-
     }
+
     /*
     @Bean
     public Job importUserJob(JobCompletionNotificationListener listener, Step step1) {
