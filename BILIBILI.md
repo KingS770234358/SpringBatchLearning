@@ -71,10 +71,40 @@ Job Launcher -> Job -> Step ->Item Reader
  #### 第1节
  使用Chunk方式实现Step的时候，可以使用ItemReader 和ItemWriter实现数据的输入输出
  ItemReader 和ItemWritem分别是实现数据输入和输出的接口
+ 自定义的ItemReaderImpl      读取String列表
  ListItemReader             读取列表
  JdbcPagingItemReader       读取MySQL
  FlatFileItemReader         读取普通文件
  StaxEventItemReader        读取xml文件
- 自定义的ItemReaderImpl       读取列表
+ MultiResourceItemReader    多文件读取数据
  
+ #### 第2节
+ 处理在读取数据过程中发生的异常
+ ItemStreamReader 继承 ItemReader 和 ItemStream
+ ·ItemReader read()方法用于读取数据
+ ·ItemStream 一系列方法用于处理异常
+    open()    Step执行之前调用
+    update()  Step【成功】处理完1批数据，Chunk(10),1批就是10条数据
+    close()   Step全部执行完成之后执行
+ 示例：读取50行数据，在第37行，由于数据错误，导致抛出异常；
+ Job停止后，将错误的数据改正，重启启动Job，将从上次出错的地方开始继续执行Job ----> 重启 
+ batch_step_execution_context表中可以查看相关信息
+ 
+ ### 第四章
+ #### 第1节 ItemWriter数据概述
+ ItemReader是逐条的读取数据，ItemWriter是逐批（chunck(10)定义）的输出数据
+  自定义的MyItemWriter      输出String列表
+  ·输出到数据库的接口
+    Neo4jItemWriter
+    MongoItemWriter
+    RepositoryItemWriter
+    HibernateItemWriter
+    JdbcBatchItemWriter    √
+    JpaItemWriter
+    GemfireItemWriter
+  任务：
+  将resource目录下的customer4FlatFileItemReaderTest.txt中的数据
+  读出，并输出到数据库中。
+  customer4FlatFileItemReaderTest.txt
+    
  
