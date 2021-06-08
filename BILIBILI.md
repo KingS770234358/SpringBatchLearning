@@ -103,8 +103,9 @@ Job Launcher -> Job -> Step ->Item Reader
     JpaItemWriter
     GemfireItemWriter
   任务：
-  将resource目录下的customer4FlatFileItemReaderTest.txt中的数据
+  1.将resource目录下的customer4FlatFileItemReaderTest.txt中的数据
   读出，并输出到数据库中。
   customer4FlatFileItemReaderTest.txt
-    
- 
+  2.将数据库中读取到的数据写入到指定txt文件中(要使用绝对路径定位文件系统中的文件进行输出
+    使用ClassPathResource定位的话，任务结束后，目标文件中并没有数据)
+  3.将数据库中读取到的数据写入到xml文件

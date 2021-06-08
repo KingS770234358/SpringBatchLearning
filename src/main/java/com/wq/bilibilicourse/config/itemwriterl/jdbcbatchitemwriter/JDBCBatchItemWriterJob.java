@@ -39,10 +39,6 @@ public class JDBCBatchItemWriterJob {
                 .start(this.myJDBCBatchItemWriterStep1())
                 .build();
     }
-
-    @Autowired
-    @Qualifier("jdbcItemWriter") // 指定要注入的Bean的BeanName
-    public JDBCItemWriter jdbcItemWriter;
     @Bean
     public Step myJDBCBatchItemWriterStep1(){
         return stepBuilderFactory.get("myJDBCBatchItemWriterStep1")

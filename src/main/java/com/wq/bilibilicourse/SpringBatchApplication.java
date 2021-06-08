@@ -28,6 +28,8 @@ public class SpringBatchApplication {
          * 问题8：JobsParameters 从运行时参数中取参数失败 ×
          * 问题9：spring-oxm xstream 弹出警告：Security framework of XStream not explicitly initialized,
          *       using predefined black list on your own risk. 说是新版本xstream会报这个警告，换成老版本？
+         * 问题10：FlatFileItemWriter在输出到文件时，如果使用 ClassPathResource定位目标输出文件的话，
+         *        任务结束后，文件中并没有写入数据 ×
          */
         SpringApplication.run(SpringBatchApplication.class);
     }
