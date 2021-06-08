@@ -78,6 +78,20 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- xml转Java对象需要依赖 1-->
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-oxm -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-oxm</artifactId>
+            <version>5.3.7</version>
+        </dependency>
+        <!-- xml转Java对象需要依赖 2-->
+        <!-- https://mvnrepository.com/artifact/com.thoughtworks.xstream/xstream -->
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.17</version>
+        </dependency>
 
     </dependencies>
 

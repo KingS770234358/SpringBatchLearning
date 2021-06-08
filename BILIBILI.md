@@ -67,4 +67,14 @@ Job Launcher -> Job -> Step ->Item Reader
  ChunkListener(before, after, error)             如果Step使用Chunk实现
  ItemReadListener,ItemProcessListener,ItemWriteListener(before, after, error)
  
+ ### 第三章
+ #### 第1节
+ 使用Chunk方式实现Step的时候，可以使用ItemReader 和ItemWriter实现数据的输入输出
+ ItemReader 和ItemWritem分别是实现数据输入和输出的接口
+ ListItemReader             读取列表
+ JdbcPagingItemReader       读取MySQL
+ FlatFileItemReader         读取普通文件
+ StaxEventItemReader        读取xml文件
+ 自定义的ItemReaderImpl       读取列表
+ 
  

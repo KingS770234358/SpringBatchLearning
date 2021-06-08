@@ -6,12 +6,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 
-@SpringBootApplication(scanBasePackages = {"com.wq.bilibilicourse"})
+@SpringBootApplication
 public class SpringBatchApplication {
     public static void main(String[] args) {
-        for (String arg : args) {
-            System.out.println(arg);
-        }
+//        for (String arg : args) {
+//            System.out.println(arg);
+//        }
         /**
          * 问题1:在JobConfiguration中@Bean定义了两个同名的Step1，后者覆盖前者
          * 问题2:在pom.xml中添加mysql-connector-java和spring-boot-starter-jdbc依赖，
@@ -26,6 +26,8 @@ public class SpringBatchApplication {
          * 问题7：可以在application.Properties中使用
          *      spring.batch.job.names=parentJob指定要运行的Job
          * 问题8：JobsParameters 从运行时参数中取参数失败 ×
+         * 问题9：spring-oxm xstream 弹出警告：Security framework of XStream not explicitly initialized,
+         *       using predefined black list on your own risk. 说是新版本xstream会报这个警告，换成老版本？
          */
         SpringApplication.run(SpringBatchApplication.class);
     }
