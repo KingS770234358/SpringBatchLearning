@@ -1,0 +1,23 @@
+<input type="text" id="msg"></input>
+<button onclick="runJob1('1')">runJob1</button>
+<button onclick="runJob1('2')">runJob2</button>
+<script type="text/javascript">
+    var baseUrl = "http://localhost:8080";
+    var xhttp = new XMLHttpRequest();
+    function runJob1(str) {
+        // alert("sss");
+        var msg = document.getElementById('msg').value;
+        var url = ""
+        if(str == '1')
+            url= baseUrl + '/job/' + msg;
+        else if(str=='2')
+            url= baseUrl + '/job2/' + msg;
+        xhttp.open('GET', url, true);
+        xhttp.send();
+        xhttp.onreadystatechange = function () {
+            if(this.readyState == 4 && this.status == 200){
+                console.log('Job status:' + this.responseText);
+            }
+        };
+    }
+</script>

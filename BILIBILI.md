@@ -109,3 +109,56 @@ Job Launcher -> Job -> Step ->Item Reader
   2.将数据库中读取到的数据写入到指定txt文件中(要使用绝对路径定位文件系统中的文件进行输出
     使用ClassPathResource定位的话，任务结束后，目标文件中并没有数据)
   3.将数据库中读取到的数据写入到xml文件
+  4.将数据库中读取到的数据写入到多个文件中
+ #### 第2节 ItemProcessor的使用
+ ItemProcessor<I,O>用于处理业务逻辑，验证，过滤等功能
+ CompositeItemProcessor
+ 从数据库读取数据 用处理器处理 然后输出到文件
+
+ #### 第3节 项目启动后Job不自动执行，而是在指定的时机通过JobLauncher启动
+ 1.在pom.xml中添加 web的starter
+ 2.编写前端页面， resource/static/index.xml，这样启动SpringBoot Web项目之后直接可以访问到该页面
+ 3.application.properties文件中要设置默认不自动执行Job
+ 4.编写controller，在接收到请求的时候用JobLauncher启动自定义的任务，并在Step执行过程中输出传入Job的参数
+ @Autowired
+ private JobLauncher jobLauncher; // 由任务模块的@EnableBatchProcessing注解注册到容器中
+ @Autowired // 任务模块JobLauncherJob的@Bean注册到容器中
+ @Qualifier("myJobLauncherJob")
+ private Job jobLauncherJob;
+ @RequestMapping("/job/{msg}")
+ public String jobRun(@PathVariable String msg){
+     // 启动JobLauncher，把接收到的参数值，通过JobLauncher传给任务Job
+     // 这里是JobParameters（JobParameter的集合）
+     JobParameters parameter = new JobParametersBuilder()
+                                 // 这里加入的是String，而不是addParameter()
+                                 .addString("msg", msg)
+                                 .toJobParameters();
+     try {
+         jobLauncher.run(jobLauncherJob, parameter);
+     } catch (Exception e) {
+         e.printStackTrace();
+     }
+     return "Job Success!";
+ }
+ 5.当Job传入的参数与之前传入的参数都不同的时候，可以视为Job不同的执行；
+   当Job传入的参数与之前某次传入的参数相同的时候，抛出异常：
+   A job instance already exists and is complete for parameters={msg=22222}.  
+   If you want to run this job again, change the parameters.
+   
+  #### 第4节 JobOperator封装JobLauncher启动任务
+  1.新增页面按钮和请求发送script
+  2.新增Controller进行 URL映射
+  3.创建JobOperator并进行相关配置，然后注入到容器中，包括：
+    jobLauncher jobRepository jobExplorer jobRegistry
+  4.创建JobRegistryBeanPostProcessor对JobRegistry进行相关处理，然后注入到容器中。
+    其中需要获得context.getAutowireCapableBeanFactory()
+    如果没有注册JobRegistryBeanPostProcessor会抛出异常：
+    No job configuration with the name [myJobOperatorJob] was registered
+    找不到jobOperator.start("myJobOperatorJob", "msg="+msg);指定的Job-"myJobOperatorJob"
+  5.当Job传入的参数与之前传入的参数都不同的时候，可以视为Job不同的执行；
+     当Job传入的参数与之前某次传入的参数相同的时候，抛出异常：
+     A job instance already exists and is complete for parameters={msg=22222}.  
+     If you want to run this job again, change the parameters.
+ 
+ ### Extra JobExecution JobExecutionContext StepExecution StepExecutionContext
+ https://blog.csdn.net/masson32/article/details/110411318

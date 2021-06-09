@@ -1,5 +1,7 @@
-package com.wq.bilibilicourse.config.itemwriterl.xmlstaxeventitemwriter;
+package com.wq.bilibilicourse.config.itemwriterl.compositeitemwriter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wq.bilibilicourse.config.itemreaderl.flatfileitemreader.Customer;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -10,7 +12,9 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
-import org.springframework.batch.item.xml.StaxEventItemReader;
+import org.springframework.batch.item.file.FlatFileItemWriter;
+import org.springframework.batch.item.file.transform.LineAggregator;
+import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.item.xml.StaxEventItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,34 +26,84 @@ import org.springframework.oxm.xstream.XStreamMarshaller;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * CompositeItemWriter 将数据输出到多个文件
+ * ClassifierCompositeItemWriter 对数据进行分类，不同类别输出到不同的文件
+ */
 @Configuration
 @EnableBatchProcessing
-public class StaxEventItemWriterJob {
+public class MultiFlatFileItemWriterJob {
+
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
 
     @Bean
-    public Job myStaxEventItemWriterJob(){
-        return jobBuilderFactory.get("myStaxEventItemWriterJob")
-                .start(this.myStaxEventItemWriterStep1())
+    public Job myMultiFlatFileItemWriterJob(){
+        return jobBuilderFactory.get("myMultiFlatFileItemWriterJob")
+                .start(this.myMultiFlatFileItemWriterStep1())
                 .build();
     }
     @Bean
-    public Step myStaxEventItemWriterStep1(){
-        return stepBuilderFactory.get("myStaxEventItemWriterStep1")
+    public Step myMultiFlatFileItemWriterStep1(){
+        return stepBuilderFactory.get("myMultiFlatFileItemWriterStep1")
                 // 指定 输入读取成Customer 输出成Customer
                 .<Customer, Customer>chunk(2) // 1次读完几个数据 进行1次数据处理
-                .reader(this.myJDBCItemReader4StaxEventItemWriter())
-                .writer(this.myStaxEventItemWriter())
+                .reader(this.myJDBCItemReader4MultiFlatFileItemWriter())
+                .writer(this.myCompositeItemWriter())
                 .build();
     }
+
     @Bean
-    public StaxEventItemWriter<Customer> myStaxEventItemWriter(){
+    public CompositeItemWriter<Customer> myCompositeItemWriter(){
+        CompositeItemWriter<Customer> compositeItemWriters = new CompositeItemWriter<>();
+        // CompositeItemWriter只是组合多个类型的reader 实现将数据输出到多个文件
+        compositeItemWriters.setDelegates(Arrays.asList(
+                this.myFlatFileItemWriter4CompositeItemWriter(),
+                this.myStaxEventItemWriter4CompositeItemWriter()));
+        return compositeItemWriters;
+    }
+
+    @Bean
+    public FlatFileItemWriter<Customer> myFlatFileItemWriter4CompositeItemWriter(){
+        // 把Customer对象转换成字符串输出到文件
+        FlatFileItemWriter<Customer> writer = new FlatFileItemWriter<>();
+        // 1.设置写入的目标文件的路
+        // 这里使用ClassPathResource定位目标输出文件 文件里没有内容
+        // writer.setResource(new ClassPathResource("customersfromysql.txt"));
+        writer.setResource(new FileSystemResource("E:\\workspace\\springBatchLearning\\src\\main\\resources\\customers4CompositeItemWriter.txt"));
+        // 2.把从数据库读取中的Customer对象转成字符串
+        writer.setLineAggregator(new LineAggregator<Customer>() { // 行聚合器
+            @Override
+            public String aggregate(Customer item) {
+                // 2.1使用ObjectMapper.writeValueAsString(Customer)将
+                // 从数据库中读取出来的Customer对象转换成 JSON 字符串
+                ObjectMapper mapper = new ObjectMapper();
+                String resultStr = null;
+                try {
+                    resultStr = mapper.writeValueAsString(item); //
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+                return resultStr; // 2.2返回 对象转换成的结果字符串
+            }
+        });
+        try {
+            // 3. 检查FlatFileItemWriter的属性设置
+            writer.afterPropertiesSet();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return writer;
+    }
+
+    @Bean
+    public StaxEventItemWriter<Customer> myStaxEventItemWriter4CompositeItemWriter(){
         StaxEventItemWriter<Customer> writer = new StaxEventItemWriter<>();
         // 使用XstreamMarshaller 将对象 转成 xml文件的元素
         // 1. 创建XstreamMarshaller 定义 xml次顶部标签 与 类 之间的关系
@@ -61,7 +115,7 @@ public class StaxEventItemWriterJob {
         // 2.设置生成的xml的最顶部（外部）的标签
         writer.setRootTagName("customers");
         // 3.设置要写入的目标xml的绝对路径
-        writer.setResource(new FileSystemResource("E:\\workspace\\springBatchLearning\\src\\main\\resources\\customersfromysql.xml"));
+        writer.setResource(new FileSystemResource("E:\\workspace\\springBatchLearning\\src\\main\\resources\\customers4CompositeItemWriter.xml"));
         try {
             // 4.writer属性设置之后的检查工作
             writer.afterPropertiesSet();
@@ -76,11 +130,11 @@ public class StaxEventItemWriterJob {
     @Bean
     @StepScope // 作用域规定在Step当中
     // 该Reader读取的是Customer对象
-    public JdbcPagingItemReader<Customer> myJDBCItemReader4StaxEventItemWriter(){
+    public JdbcPagingItemReader<Customer> myJDBCItemReader4MultiFlatFileItemWriter(){
         // 创建Jdbc分页读取器
         JdbcPagingItemReader<Customer> reader = new JdbcPagingItemReader<>();
         reader.setDataSource(dataSource); // 设置数据源 application.properties中配置
-        reader.setFetchSize(2); // 设置每次读取的记录条数
+        reader.setFetchSize(2); // 设置每次读取的记录条数========
 
         // 指定查询用的Sql语句-MySqlPagingQueryProvider
         MySqlPagingQueryProvider mySqlPagingQueryProvider = new MySqlPagingQueryProvider();
@@ -95,6 +149,7 @@ public class StaxEventItemWriterJob {
         reader.setRowMapper(new RowMapper<Customer>() {
             @Override
             public Customer mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+                System.out.println("记录号：" + rowNum);
                 Customer customer = new Customer();
                 customer.setId(resultSet.getInt(1)); // 以Int的方式接收结果集中的第1列，也就是id
                 customer.setFirstName(resultSet.getString(2));// 以String的方式接收结果集中的第2列，也就是firstName
@@ -105,4 +160,5 @@ public class StaxEventItemWriterJob {
         });
         return reader;
     }
+
 }

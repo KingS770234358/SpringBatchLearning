@@ -1,65 +1,107 @@
-package com.wq.bilibilicourse.config.itemwriterl.flatfileitemwriter;
+package com.wq.bilibilicourse.config.itemprocessor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wq.bilibilicourse.config.itemreaderl.flatfileitemreader.Customer;
-import com.wq.bilibilicourse.config.itemreaderl.jdbcitemreader.User;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.LineAggregator;
+import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
 @EnableBatchProcessing
-public class FlatFileItemWriterJob {
+public class ItemProcessorJob {
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
 
     @Bean
-    public Job myFlatFileItemWriterJob(){
-        return jobBuilderFactory.get("myFlatFileItemWriterJob")
-                .start(this.myFlatFileItemWriterStep1())
+    public Job myItemProcessorJob(){
+        return jobBuilderFactory.get("myItemProcessorJob")
+                .start(this.myItemProcessorStep1())
                 .build();
     }
     @Bean
-    public Step myFlatFileItemWriterStep1(){
-        return stepBuilderFactory.get("myFlatFileItemWriterStep1")
+    public Step myItemProcessorStep1(){
+        return stepBuilderFactory.get("myItemProcessorStep1")
                 // 指定 输入读取成Customer 输出成Customer
                 .<Customer, Customer>chunk(2) // 1次读完几个数据 进行1次数据处理
-                .reader(this.myJDBCItemReader4FlatFileItemWriter())
-                .writer(this.myFlatFileItemWriter())
+                .reader(this.myJDBCItemReader4ItemProcessor())
+                // .processor(this.myItemProcessor())
+                .processor(this.myCompositeProcessor())
+                .writer(this.myFlatFileItemWriter4ItemProcessor())
                 .build();
     }
 
     @Bean
-    public FlatFileItemWriter<Customer> myFlatFileItemWriter(){
+    public CompositeItemProcessor<Customer, Customer> myCompositeProcessor(){
+        CompositeItemProcessor<Customer, Customer> processor = new CompositeItemProcessor<Customer, Customer>();
+        List<ItemProcessor<Customer, Customer>> processors
+                = Arrays.asList(this.myItemProcessor(), this.myItemProcessor1());
+        processor.setDelegates(processors);
+        return processor;
+    }
+
+    @Bean // 对ItemReader读入数据的处理 将Customer的firstName转成大写
+    public ItemProcessor<Customer, Customer> myItemProcessor(){
+        return new ItemProcessor<Customer, Customer>(){
+            @Override
+            public Customer process(Customer item) throws Exception {
+                Customer customer = new Customer();
+                customer.setId(item.getId());
+                customer.setFirstName(item.getFirstName().toUpperCase());
+                customer.setLastName(item.getLastName());
+                customer.setBirthday(item.getBirthday());
+                return customer; // 返回处理后的Customer
+            }
+        };
+    }
+
+    @Bean
+    public ItemProcessor<Customer, Customer> myItemProcessor1(){
+        return new ItemProcessor<Customer, Customer>(){
+            @Override
+            public Customer process(Customer item) throws Exception {
+                if(item.getId()%2!=0){
+                    return item;
+                }else{
+                    return null; // 过滤掉 id为偶数的 Customer
+                }
+            }
+        };
+    }
+
+    @Bean
+    public FlatFileItemWriter<Customer> myFlatFileItemWriter4ItemProcessor(){
         // 把Customer对象转换成字符串输出到文件
         FlatFileItemWriter<Customer> writer = new FlatFileItemWriter<>();
         // 1.设置写入的目标文件的路
         // 这里使用ClassPathResource定位目标输出文件 文件里没有内容
         // writer.setResource(new ClassPathResource("customersfromysql.txt"));
-        writer.setResource(new FileSystemResource("E:\\workspace\\springBatchLearning\\src\\main\\resources\\customersfromysql.txt"));
+        writer.setResource(new FileSystemResource("E:\\workspace\\springBatchLearning\\src\\main\\resources\\customers4ItemProcessor.txt"));
         // 2.把从数据库读取中的Customer对象转成字符串
         writer.setLineAggregator(new LineAggregator<Customer>() { // 行聚合器
             @Override
@@ -90,7 +132,7 @@ public class FlatFileItemWriterJob {
     @Bean
     @StepScope // 作用域规定在Step当中
     // 该Reader读取的是Customer对象
-    public JdbcPagingItemReader<Customer> myJDBCItemReader4FlatFileItemWriter(){
+    public JdbcPagingItemReader<Customer> myJDBCItemReader4ItemProcessor(){
         // 创建Jdbc分页读取器
         JdbcPagingItemReader<Customer> reader = new JdbcPagingItemReader<>();
         reader.setDataSource(dataSource); // 设置数据源 application.properties中配置
@@ -120,4 +162,5 @@ public class FlatFileItemWriterJob {
         });
         return reader;
     }
+
 }
